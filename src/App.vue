@@ -11,8 +11,20 @@ const page = ref(null)
 const stack = ['Vue 3', 'JavaScript', 'Three.js', 'Node.js', 'uni-app', 'Express', 'MySQL', 'Unity', 'Unreal Engine']
 let previousFocus
 let revealObserver
+let stageObserver
 
 onMounted(() => {
+  if ('ResizeObserver' in window) {
+    stageObserver = new ResizeObserver((entries) => {
+      for (const { target } of entries) {
+        target.style.setProperty('--stage-height', `${target.offsetHeight}px`)
+      }
+    })
+    for (const stage of page.value.querySelectorAll('.project-stage')) {
+      stageObserver.observe(stage, { box: 'border-box' })
+    }
+  }
+
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) return
 
   revealObserver = new IntersectionObserver((entries) => {
@@ -30,7 +42,10 @@ onMounted(() => {
   }
 })
 
-onUnmounted(() => revealObserver?.disconnect())
+onUnmounted(() => {
+  revealObserver?.disconnect()
+  stageObserver?.disconnect()
+})
 
 function revealFocusedProject(event, projectId) {
   const control = event.target
