@@ -23,7 +23,7 @@ export const projects = [
     tags: ['Three.js', 'JavaScript', 'HTML / CSS'],
     repo: 'smart-factory',
     images: [{ file: 'factory.webp', label: '智慧工厂产线与设备监控面板' }],
-    video: null,
+    video: 'factory-demo.mp4',
   },
   {
     id: 'solar',
@@ -33,6 +33,6 @@ export const projects = [
     tags: ['Three.js', 'JavaScript', 'OrbitControls'],
     repo: 'solar-system',
     images: [{ file: 'solar.webp', label: '太阳、行星轨道与时间控制面板' }],
-    video: null,
+    video: 'solar-demo.mp4',
   },
 ]
