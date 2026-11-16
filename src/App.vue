@@ -1,6 +1,7 @@
 <script setup>
 import { nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { github, media, projects } from './projects.js'
+import { mountProjectMotion } from './projectMotion.js'
 
 const modal = ref(null)
 const selection = ref(null)
@@ -12,18 +13,22 @@ const stack = ['Vue 3', 'JavaScript', 'Three.js', 'Node.js', 'uni-app', 'Express
 let previousFocus
 let revealObserver
 let stageObserver
+let disposeProjectMotion
 
 onMounted(() => {
+  const stages = page.value.querySelectorAll('.project-stage')
   if ('ResizeObserver' in window) {
     stageObserver = new ResizeObserver((entries) => {
       for (const { target } of entries) {
         target.style.setProperty('--stage-height', `${target.offsetHeight}px`)
       }
     })
-    for (const stage of page.value.querySelectorAll('.project-stage')) {
+    for (const stage of stages) {
       stageObserver.observe(stage, { box: 'border-box' })
     }
   }
+
+  disposeProjectMotion = mountProjectMotion(stages)
 
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) return
 
@@ -45,6 +50,7 @@ onMounted(() => {
 onUnmounted(() => {
   revealObserver?.disconnect()
   stageObserver?.disconnect()
+  disposeProjectMotion?.()
 })
 
 function revealFocusedProject(event, projectId) {
@@ -112,11 +118,13 @@ function onClose() {
               </div>
             </div>
             <button class="project-cover" :class="project.id" type="button" @click="showMedia(project, 'images')" :aria-label="'查看' + project.title + '的项目截图'">
-              <template v-if="project.id === 'mall'">
-                <img class="cover-admin" :src="media(project.images[0].file)" alt="" loading="lazy">
-                <img class="cover-phone" :src="media(project.images[1].file)" alt="" loading="lazy">
-              </template>
-              <img v-else :src="media(project.images[0].file)" alt="" loading="lazy">
+              <span class="project-cover-media">
+                <template v-if="project.id === 'mall'">
+                  <img class="cover-admin" :src="media(project.images[0].file)" alt="" loading="lazy">
+                  <img class="cover-phone" :src="media(project.images[1].file)" alt="" loading="lazy">
+                </template>
+                <img v-else :src="media(project.images[0].file)" alt="" loading="lazy">
+              </span>
               <span class="cover-action" aria-hidden="true">⤢</span>
             </button>
           </div>
@@ -161,7 +169,7 @@ function onClose() {
     </div>
   </footer>
 
-  <dialog ref="modal" aria-labelledby="media-title" @close="onClose" @click.self="modal.close()">
+  <dialog ref="modal" data-lenis-prevent aria-labelledby="media-title" @close="onClose" @click.self="modal.close()">
     <div v-if="selection" class="dialog-content">
       <div class="dialog-head">
         <h2 id="media-title">{{ selection.project.title }}<span> / {{ selection.kind === 'video' ? '项目演示' : '项目截图' }}</span></h2>
