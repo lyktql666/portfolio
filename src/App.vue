@@ -1,12 +1,36 @@
 <script setup>
-import { nextTick, ref } from 'vue'
+import { nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { github, media, projects } from './projects.js'
 
 const modal = ref(null)
 const selection = ref(null)
 const imageIndex = ref(0)
 const videoFailed = ref(false)
+const marqueePaused = ref(false)
+const page = ref(null)
+const stack = ['Vue 3', 'JavaScript', 'Three.js', 'Node.js', 'uni-app', 'Express', 'MySQL', 'Unity', 'Unreal Engine']
 let previousFocus
+let revealObserver
+
+onMounted(() => {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) return
+
+  revealObserver = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue
+      entry.target.classList.remove('awaiting-reveal')
+      revealObserver.unobserve(entry.target)
+    }
+  }, { threshold: 0.1 })
+
+  for (const element of page.value.querySelectorAll('[data-reveal]')) {
+    if (element.getBoundingClientRect().top < window.innerHeight) continue
+    element.classList.add('awaiting-reveal')
+    revealObserver.observe(element)
+  }
+})
+
+onUnmounted(() => revealObserver?.disconnect())
 
 async function showMedia(project, kind) {
   previousFocus = document.activeElement
@@ -36,32 +60,47 @@ function onClose() {
     </div>
   </header>
 
-  <main>
+  <main ref="page">
     <section class="hero container" aria-labelledby="hero-title">
       <div class="hero-copy">
-        <p class="eyebrow"><span></span>个人作品集</p>
-        <h1 id="hero-title">刘赟楷<span>.</span></h1>
-        <p class="hero-role">全栈开发<span> / </span>三维交互</p>
-        <p class="hero-intro">重庆工程学院虚拟现实技术专业本科生。我的项目实践涵盖 Vue 前端、Node.js 接口开发和 Three.js 三维场景。</p>
-        <div class="hero-actions">
+        <p class="availability hero-enter"><span aria-hidden="true"></span>正在寻找全栈开发岗位</p>
+        <h1 id="hero-title" class="hero-enter">刘赟楷<span class="hero-period">.</span>
+          <span class="hero-role">全栈开发与三维交互</span>
+        </h1>
+        <p class="hero-intro hero-enter">重庆工程学院虚拟现实技术专业本科生。我的项目实践涵盖 Vue 前端、Node.js 接口开发和 Three.js 三维场景。</p>
+        <div class="hero-actions hero-enter">
           <a class="button primary" href="#projects">浏览项目 <span aria-hidden="true">↓</span></a>
           <a class="button quiet" :href="github" target="_blank" rel="noopener noreferrer">GitHub 主页 <span aria-hidden="true">↗</span></a>
         </div>
       </div>
       <a class="hero-visual" href="#solar" aria-label="查看太阳系 3D 模拟器项目">
-        <img :src="media('solar-hero.webp')" alt="星空中发光的太阳与行星轨道" width="1400" height="1050" fetchpriority="high">
-        <span class="visual-caption"><span><small>SOLAR SYSTEM</small>太阳系 3D 模拟器</span><span class="visual-arrow" aria-hidden="true">↘</span></span>
+        <span class="hero-art"><img :src="media('solar-hero.webp')" alt="" width="1400" height="979" fetchpriority="high"></span>
+        <span class="visual-caption hero-enter"><span><small>THREE.JS</small>太阳系 3D 模拟器</span><span class="visual-arrow" aria-hidden="true">↘</span></span>
       </a>
+    </section>
+
+    <section class="stack container" aria-labelledby="stack-title">
+      <h2 id="stack-title">技术栈</h2>
+      <div class="marquee" :class="{ paused: marqueePaused }">
+        <div class="marquee-track">
+          <ul v-for="copy in 2" :key="copy" class="marquee-list" :aria-hidden="copy === 2 ? 'true' : undefined">
+            <li v-for="tool in stack" :key="tool">{{ tool }}</li>
+          </ul>
+        </div>
+      </div>
+      <button class="marquee-toggle" type="button" :aria-label="marqueePaused ? '继续滚动技术栈' : '暂停滚动技术栈'" @click="marqueePaused = !marqueePaused">
+        <span aria-hidden="true">{{ marqueePaused ? '▷' : 'Ⅱ' }}</span>
+      </button>
     </section>
 
     <section id="projects" class="projects-section" aria-labelledby="projects-title">
       <div class="container">
-        <div class="section-head">
-          <div><p class="section-label">SELECTED PROJECTS</p><h2 id="projects-title">项目作品</h2></div>
+        <div class="section-head" data-reveal>
+          <h2 id="projects-title">项目作品</h2>
           <a class="text-link" :href="github + '?tab=repositories'" target="_blank" rel="noopener noreferrer">全部 GitHub 仓库 <span aria-hidden="true">↗</span></a>
         </div>
         <div class="project-grid">
-          <article v-for="project in projects" :key="project.id" :id="project.id" class="project-card">
+          <article v-for="project in projects" :key="project.id" :id="project.id" class="project-card" :class="{ featured: project.id === 'mall' }" data-reveal>
             <button class="project-cover" :class="project.id" type="button" @click="showMedia(project, 'images')" :aria-label="'查看' + project.title + '的项目截图'">
               <template v-if="project.id === 'mall'">
                 <img class="cover-admin" :src="media(project.images[0].file)" alt="" loading="lazy">
@@ -87,17 +126,18 @@ function onClose() {
     </section>
 
     <section id="about" class="about container" aria-labelledby="about-title">
-      <div>
-        <p class="section-label">ABOUT</p>
-        <h2 id="about-title">关于我</h2>
-        <p class="about-intro">我正在寻找全栈开发岗位。做项目时，我喜欢先把问题拆成可验证的小步骤，再用页面和接口联调逐一确认。</p>
-        <p class="education"><strong>重庆工程学院</strong><span>虚拟现实技术 · 本科</span><span>2023.09 — 2027.07</span></p>
+      <div class="section-head" data-reveal><h2 id="about-title">关于我</h2></div>
+      <div class="about-grid">
+        <div class="about-bio" data-reveal>
+          <p class="about-intro">做项目时，我习惯先把问题拆成可验证的小步骤，再用页面和接口联调逐一确认。</p>
+          <p class="education"><strong>重庆工程学院</strong><span>虚拟现实技术 · 本科</span><span>2023.09 — 2027.07</span></p>
+        </div>
+        <dl class="skills" data-reveal>
+          <div><dt>前端</dt><dd>Vue 3 · Vue Router · Pinia · Element Plus · uni-app</dd></div>
+          <div><dt>后端与数据库</dt><dd>Node.js · Express · MySQL · Sequelize</dd></div>
+          <div><dt>三维开发</dt><dd>Three.js · Unity · Unreal Engine</dd></div>
+        </dl>
       </div>
-      <dl class="skills">
-        <div><dt>前端</dt><dd>Vue 3 · Vue Router · Pinia · Element Plus · uni-app</dd></div>
-        <div><dt>后端与数据库</dt><dd>Node.js · Express · MySQL · Sequelize</dd></div>
-        <div><dt>三维开发</dt><dd>Three.js · Unity · Unreal Engine</dd></div>
-      </dl>
     </section>
   </main>
 
