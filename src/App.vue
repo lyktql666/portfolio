@@ -1,11 +1,13 @@
 <script setup>
-import { nextTick, onMounted, onUnmounted, ref } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { github, media, projects } from './projects.js'
 import { mountProjectMotion } from './projectMotion.js'
 
 const modal = ref(null)
 const selection = ref(null)
 const imageIndex = ref(0)
+const imageOptions = ref(null)
+const currentImage = computed(() => selection.value?.project.images[imageIndex.value])
 const videoFailed = ref(false)
 const marqueePaused = ref(false)
 const page = ref(null)
@@ -73,6 +75,25 @@ async function showMedia(project, kind) {
   modal.value.showModal()
 }
 
+async function selectImage(index) {
+  const count = selection.value.project.images.length
+  imageIndex.value = (index + count) % count
+  await nextTick()
+  imageOptions.value?.querySelector('[aria-pressed="true"]')?.scrollIntoView({
+    block: 'nearest',
+    inline: 'nearest',
+    behavior: 'instant',
+  })
+}
+
+function onGalleryKey(event) {
+  if (selection.value?.kind !== 'images') return
+  const direction = { ArrowLeft: -1, ArrowRight: 1 }[event.key]
+  if (!direction) return
+  event.preventDefault()
+  selectImage(imageIndex.value + direction)
+}
+
 function onClose() {
   selection.value = null
   previousFocus?.focus()
@@ -125,7 +146,7 @@ function onClose() {
                 </template>
                 <img v-else :src="media(project.images[0].file)" alt="" loading="lazy">
               </span>
-              <span class="cover-action" aria-hidden="true">⤢</span>
+              <span class="cover-action" aria-hidden="true">{{ project.images.length }} 张截图 <span>⤢</span></span>
             </button>
           </div>
         </article>
@@ -169,7 +190,7 @@ function onClose() {
     </div>
   </footer>
 
-  <dialog ref="modal" data-lenis-prevent aria-labelledby="media-title" @close="onClose" @click.self="modal.close()">
+  <dialog ref="modal" data-lenis-prevent aria-labelledby="media-title" @close="onClose" @click.self="modal.close()" @keydown="onGalleryKey">
     <div v-if="selection" class="dialog-content">
       <div class="dialog-head">
         <h2 id="media-title">{{ selection.project.title }}<span> / {{ selection.kind === 'video' ? '项目演示' : '项目截图' }}</span></h2>
@@ -181,11 +202,20 @@ function onClose() {
       </template>
       <template v-else>
         <figure>
-          <img :src="media(selection.project.images[imageIndex].file)" :alt="selection.project.images[imageIndex].label">
-          <figcaption>{{ selection.project.images[imageIndex].label }}</figcaption>
+          <div class="gallery-frame"><img :src="media(currentImage.file)" :alt="currentImage.label"></div>
+          <figcaption aria-live="polite">
+            <span>{{ currentImage.label }}</span>
+            <span class="gallery-count">{{ imageIndex + 1 }} / {{ selection.project.images.length }}</span>
+          </figcaption>
         </figure>
-        <div v-if="selection.project.images.length > 1" class="image-options" aria-label="选择截图">
-          <button v-for="(shot, index) in selection.project.images" :key="shot.file" type="button" :aria-pressed="index === imageIndex" @click="imageIndex = index">{{ shot.label }}</button>
+        <div v-if="selection.project.images.length > 1" class="gallery-navigation">
+          <button class="gallery-arrow" type="button" aria-label="上一张截图" @click="selectImage(imageIndex - 1)">←</button>
+          <div ref="imageOptions" class="image-options" role="group" aria-label="选择截图">
+            <button v-for="(shot, index) in selection.project.images" :key="shot.file" type="button" :aria-label="shot.label" :title="shot.label" :aria-pressed="index === imageIndex" @click="selectImage(index)">
+              <img :src="media(shot.file)" alt="" loading="lazy" decoding="async">
+            </button>
+          </div>
+          <button class="gallery-arrow" type="button" aria-label="下一张截图" @click="selectImage(imageIndex + 1)">→</button>
         </div>
       </template>
     </div>
