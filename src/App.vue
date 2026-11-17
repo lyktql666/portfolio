@@ -1,17 +1,15 @@
 <script setup>
-import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
+import { nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { github, media, projects } from './projects.js'
 import { mountProjectMotion } from './projectMotion.js'
+import ProjectCarousel from './ProjectCarousel.vue'
 
 const modal = ref(null)
-const selection = ref(null)
-const imageIndex = ref(0)
-const imageOptions = ref(null)
-const currentImage = computed(() => selection.value?.project.images[imageIndex.value])
+const activeVideo = ref(null)
 const videoFailed = ref(false)
 const marqueePaused = ref(false)
 const page = ref(null)
-const stack = ['Three.js', 'JavaScript', 'Vue 3', 'Unity', 'Unreal Engine', 'Node.js', 'uni-app', 'Express', 'MySQL']
+const stack = ['Vue 3', 'JavaScript', 'Three.js', 'Node.js', 'uni-app', 'Express', 'MySQL', 'Unity', 'Unreal Engine']
 let previousFocus
 let revealObserver
 let stageObserver
@@ -66,36 +64,16 @@ function revealFocusedProject(event, projectId) {
   }
 }
 
-async function showMedia(project, kind) {
-  previousFocus = document.activeElement
-  selection.value = { project, kind }
-  imageIndex.value = 0
+async function showVideo(project, trigger) {
+  previousFocus = trigger
+  activeVideo.value = project
   videoFailed.value = false
   await nextTick()
   modal.value.showModal()
 }
 
-async function selectImage(index) {
-  const count = selection.value.project.images.length
-  imageIndex.value = (index + count) % count
-  await nextTick()
-  imageOptions.value?.querySelector('[aria-pressed="true"]')?.scrollIntoView({
-    block: 'nearest',
-    inline: 'nearest',
-    behavior: 'instant',
-  })
-}
-
-function onGalleryKey(event) {
-  if (selection.value?.kind !== 'images') return
-  const direction = { ArrowLeft: -1, ArrowRight: 1 }[event.key]
-  if (!direction) return
-  event.preventDefault()
-  selectImage(imageIndex.value + direction)
-}
-
 function onClose() {
-  selection.value = null
+  activeVideo.value = null
   previousFocus?.focus()
 }
 </script>
@@ -105,12 +83,9 @@ function onClose() {
   <main ref="page">
     <section id="top" class="hero" aria-labelledby="hero-title">
       <div class="hero-copy">
-        <p class="availability hero-enter"><span aria-hidden="true"></span>正在寻找 Three.js 三维开发岗位</p>
         <div class="hero-introduction">
-          <h1 id="hero-title" class="hero-enter">刘赟楷<span class="hero-period">.</span>
-            <span class="hero-role">Three.js 与三维交互</span>
-          </h1>
-          <p class="hero-intro hero-enter">重庆工程学院虚拟现实技术专业本科生。我用 Three.js 开发网页三维场景，项目包括支持行星跟随的太阳系模拟器和可模拟设备故障的智慧工厂。</p>
+          <h1 id="hero-title" class="hero-enter">刘赟楷<span class="hero-period">.</span></h1>
+          <p class="hero-intro hero-enter">重庆工程学院虚拟现实技术专业本科生。我的项目实践涵盖 Vue 前端、Node.js 接口开发和 Three.js 三维场景。</p>
           <a class="button primary hero-enter" href="#projects">浏览项目 <span aria-hidden="true">↓</span></a>
         </div>
         <a class="hero-github text-link hero-enter" :href="github" target="_blank" rel="noopener noreferrer">GitHub 主页 <span aria-hidden="true">↗</span></a>
@@ -133,21 +108,12 @@ function onClose() {
                 <ul class="tags" aria-label="技术栈"><li v-for="tag in project.tags" :key="tag">{{ tag }}</li></ul>
                 <div class="project-actions">
                   <a class="button primary" :href="github + '/' + project.repo" target="_blank" rel="noopener noreferrer">查看源码 <span aria-hidden="true">↗</span></a>
-                  <button v-if="project.video" class="button quiet" type="button" @click="showMedia(project, 'video')"><span aria-hidden="true">▶</span> 播放演示</button>
+                  <button v-if="project.video" class="button quiet" type="button" @click="showVideo(project, $event.currentTarget)"><span aria-hidden="true">▶</span> 播放演示</button>
                   <span v-else class="video-pending"><span aria-hidden="true">▷</span> 演示视频待补充</span>
                 </div>
               </div>
             </div>
-            <button class="project-cover" :class="project.id" type="button" @click="showMedia(project, 'images')" :aria-label="'查看' + project.title + '的项目截图'">
-              <span class="project-cover-media">
-                <template v-if="project.id === 'mall'">
-                  <img class="cover-admin" :src="media(project.images[0].file)" alt="" loading="lazy">
-                  <img class="cover-phone" :src="media(project.images[1].file)" alt="" loading="lazy">
-                </template>
-                <img v-else :src="media(project.images[0].file)" alt="" loading="lazy">
-              </span>
-              <span class="cover-action" aria-hidden="true">{{ project.images.length }} 张截图 <span>⤢</span></span>
-            </button>
+            <ProjectCarousel :project="project" />
           </div>
         </article>
       </template>
@@ -161,9 +127,9 @@ function onClose() {
           <p class="education"><strong>重庆工程学院</strong><span>虚拟现实技术 · 本科</span><span>2023.09 — 2027.07</span></p>
         </div>
         <dl class="skills" data-reveal>
-          <div><dt>三维开发</dt><dd>Three.js · Unity · Unreal Engine</dd></div>
           <div><dt>前端</dt><dd>Vue 3 · Vue Router · Pinia · Element Plus · uni-app</dd></div>
           <div><dt>后端与数据库</dt><dd>Node.js · Express · MySQL · Sequelize</dd></div>
+          <div><dt>三维开发</dt><dd>Three.js · Unity · Unreal Engine</dd></div>
         </dl>
       </div>
       <section class="stack" aria-labelledby="stack-title">
@@ -190,34 +156,14 @@ function onClose() {
     </div>
   </footer>
 
-  <dialog ref="modal" data-lenis-prevent aria-labelledby="media-title" @close="onClose" @click.self="modal.close()" @keydown="onGalleryKey">
-    <div v-if="selection" class="dialog-content">
+  <dialog ref="modal" data-lenis-prevent aria-labelledby="media-title" @close="onClose" @click.self="modal.close()">
+    <div v-if="activeVideo" class="dialog-content">
       <div class="dialog-head">
-        <h2 id="media-title">{{ selection.project.title }}<span> / {{ selection.kind === 'video' ? '项目演示' : '项目截图' }}</span></h2>
+        <h2 id="media-title">{{ activeVideo.title }}<span> / 项目演示</span></h2>
         <button class="close" type="button" aria-label="关闭" autofocus @click="modal.close()">×</button>
       </div>
-      <template v-if="selection.kind === 'video'">
-        <video :src="media(selection.project.video)" :poster="media(selection.project.images[0].file)" controls playsinline preload="metadata" @error="videoFailed = true"></video>
-        <p v-if="videoFailed" class="video-error">视频暂时无法在播放器中加载。<a :href="media(selection.project.video)" target="_blank" rel="noopener noreferrer">打开视频文件</a></p>
-      </template>
-      <template v-else>
-        <figure>
-          <div class="gallery-frame"><img :src="media(currentImage.file)" :alt="currentImage.label"></div>
-          <figcaption aria-live="polite">
-            <span>{{ currentImage.label }}</span>
-            <span class="gallery-count">{{ imageIndex + 1 }} / {{ selection.project.images.length }}</span>
-          </figcaption>
-        </figure>
-        <div v-if="selection.project.images.length > 1" class="gallery-navigation">
-          <button class="gallery-arrow" type="button" aria-label="上一张截图" @click="selectImage(imageIndex - 1)">←</button>
-          <div ref="imageOptions" class="image-options" role="group" aria-label="选择截图">
-            <button v-for="(shot, index) in selection.project.images" :key="shot.file" type="button" :aria-label="shot.label" :title="shot.label" :aria-pressed="index === imageIndex" @click="selectImage(index)">
-              <img :src="media(shot.file)" alt="" loading="lazy" decoding="async">
-            </button>
-          </div>
-          <button class="gallery-arrow" type="button" aria-label="下一张截图" @click="selectImage(imageIndex + 1)">→</button>
-        </div>
-      </template>
+      <video :src="media(activeVideo.video)" :poster="media(activeVideo.images[0].file)" controls playsinline preload="metadata" @error="videoFailed = true"></video>
+      <p v-if="videoFailed" class="video-error">视频暂时无法在播放器中加载。<a :href="media(activeVideo.video)" target="_blank" rel="noopener noreferrer">打开视频文件</a></p>
     </div>
   </dialog>
 </template>
