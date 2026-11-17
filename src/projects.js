@@ -3,6 +3,22 @@ export const media = (name) => `${import.meta.env.BASE_URL}media/${name}`
 
 export const projects = [
   {
+    id: 'factory',
+    category: '工业 · 三维可视化',
+    title: '智慧工厂数字孪生',
+    description: '搭建三维产线和设备监控面板。模拟设备故障、停线和检修恢复，并在场景中定位设备、查看运行状态。',
+    tags: ['Three.js', 'JavaScript', 'HTML / CSS'],
+    repo: 'smart-factory',
+    images: [
+      { file: 'factory.webp', label: '智慧工厂产线与设备监控面板' },
+      { file: 'factory-layout.webp', label: '厂区俯视与工位布局' },
+      { file: 'factory-inspection.webp', label: '视觉质检机定位' },
+      { file: 'factory-alarm.webp', label: '故障告警与联动停线' },
+      { file: 'factory-maintenance.webp', label: '设备检修倒计时' },
+    ],
+    video: 'factory-demo.mp4',
+  },
+  {
     id: 'solar',
     category: '天文 · 三维交互',
     title: '太阳系 3D 模拟器',
@@ -34,21 +50,5 @@ export const projects = [
       { file: 'mall-admin-login.webp', label: '管理端登录' },
     ],
     video: 'mall-demo.mp4',
-  },
-  {
-    id: 'factory',
-    category: '工业 · 三维可视化',
-    title: '智慧工厂数字孪生',
-    description: '搭建三维产线和设备监控面板。模拟设备故障、停线和检修恢复，并在场景中定位设备、查看运行状态。',
-    tags: ['Three.js', 'JavaScript', 'HTML / CSS'],
-    repo: 'smart-factory',
-    images: [
-      { file: 'factory.webp', label: '智慧工厂产线与设备监控面板' },
-      { file: 'factory-layout.webp', label: '厂区俯视与工位布局' },
-      { file: 'factory-inspection.webp', label: '视觉质检机定位' },
-      { file: 'factory-alarm.webp', label: '故障告警与联动停线' },
-      { file: 'factory-maintenance.webp', label: '设备检修倒计时' },
-    ],
-    video: 'factory-demo.mp4',
   },
 ]

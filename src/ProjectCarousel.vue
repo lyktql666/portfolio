@@ -47,6 +47,10 @@ function updateSwipe(event) {
   dragOffset.value = Math.max(-swipe.width, Math.min(swipe.width, atStart || atEnd ? offset / 3 : offset))
 }
 
+function consumeTouchSwipe(event) {
+  if (dragging.value && event.touches.length === 1 && event.cancelable) event.preventDefault()
+}
+
 function endSwipe(event, cancelled = false) {
   if (swipe?.id !== event.pointerId) return
   let direction = 0
@@ -80,6 +84,7 @@ function endSwipe(event, cancelled = false) {
       :class="{ dragging }"
       @pointerdown="startSwipe"
       @pointermove="updateSwipe"
+      @touchmove="consumeTouchSwipe"
       @pointerup="endSwipe"
       @pointercancel="endSwipe($event, true)"
       @lostpointercapture="endSwipe($event, true)"

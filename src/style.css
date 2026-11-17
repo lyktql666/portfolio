@@ -133,7 +133,7 @@ h1 { font-size: clamp(64px, min(8.7vw, 15svh), 156px); font-weight: 720; line-he
 .mall .cover-admin { left: 7%; width: 78%; border-radius: 8px; }
 .mall .cover-phone { right: 8%; width: 22%; max-height: 81%; border-radius: 12px; }
 .carousel-arrow, .carousel-count { position: absolute; display: grid; place-items: center; border: 1px solid #fff4e855; border-radius: 100px; background: #151211df; color: #fff8f0; }
-.carousel-arrow { top: 50%; translate: 0 -50%; width: 44px; height: 44px; padding: 0; transition: background-color .2s, border-color .2s, color .2s; }
+.carousel-arrow { top: 50%; translate: 0 -50%; width: 44px; height: 44px; padding: 0; touch-action: manipulation; transition: background-color .2s, border-color .2s, color .2s; }
 .carousel-arrow.previous { left: clamp(8px, 1.2vw, 22px); }
 .carousel-arrow.next { right: clamp(8px, 1.2vw, 22px); }
 .carousel-arrow span { width: 9px; height: 9px; border-top: 2px solid; border-right: 2px solid; }
