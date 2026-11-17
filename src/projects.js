@@ -20,7 +20,7 @@ export const projects = [
   },
   {
     id: 'mall',
-    category: '电商 · 全栈开发',
+    category: '电商 · 用户端与管理后台',
     title: '母婴商城系统',
     description: '一套包含 uni-app 用户端和 Web 管理后台的商城。用户端覆盖商品浏览、购物车和订单，后台支持商品分类、订单处理及客户分析。',
     tags: ['Vue 3', 'uni-app', 'Express', 'MySQL'],

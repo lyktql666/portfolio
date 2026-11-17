@@ -11,7 +11,7 @@ const currentImage = computed(() => selection.value?.project.images[imageIndex.v
 const videoFailed = ref(false)
 const marqueePaused = ref(false)
 const page = ref(null)
-const stack = ['Vue 3', 'JavaScript', 'Three.js', 'Node.js', 'uni-app', 'Express', 'MySQL', 'Unity', 'Unreal Engine']
+const stack = ['Three.js', 'JavaScript', 'Vue 3', 'Unity', 'Unreal Engine', 'Node.js', 'uni-app', 'Express', 'MySQL']
 let previousFocus
 let revealObserver
 let stageObserver
@@ -105,12 +105,12 @@ function onClose() {
   <main ref="page">
     <section id="top" class="hero" aria-labelledby="hero-title">
       <div class="hero-copy">
-        <p class="availability hero-enter"><span aria-hidden="true"></span>正在寻找全栈开发岗位</p>
+        <p class="availability hero-enter"><span aria-hidden="true"></span>正在寻找 Three.js 三维开发岗位</p>
         <div class="hero-introduction">
           <h1 id="hero-title" class="hero-enter">刘赟楷<span class="hero-period">.</span>
-            <span class="hero-role">全栈开发与三维交互</span>
+            <span class="hero-role">Three.js 与三维交互</span>
           </h1>
-          <p class="hero-intro hero-enter">重庆工程学院虚拟现实技术专业本科生。我的项目实践涵盖 Vue 前端、Node.js 接口开发和 Three.js 三维场景。</p>
+          <p class="hero-intro hero-enter">重庆工程学院虚拟现实技术专业本科生。我用 Three.js 开发网页三维场景，项目包括支持行星跟随的太阳系模拟器和可模拟设备故障的智慧工厂。</p>
           <a class="button primary hero-enter" href="#projects">浏览项目 <span aria-hidden="true">↓</span></a>
         </div>
         <a class="hero-github text-link hero-enter" :href="github" target="_blank" rel="noopener noreferrer">GitHub 主页 <span aria-hidden="true">↗</span></a>
@@ -161,9 +161,9 @@ function onClose() {
           <p class="education"><strong>重庆工程学院</strong><span>虚拟现实技术 · 本科</span><span>2023.09 — 2027.07</span></p>
         </div>
         <dl class="skills" data-reveal>
+          <div><dt>三维开发</dt><dd>Three.js · Unity · Unreal Engine</dd></div>
           <div><dt>前端</dt><dd>Vue 3 · Vue Router · Pinia · Element Plus · uni-app</dd></div>
           <div><dt>后端与数据库</dt><dd>Node.js · Express · MySQL · Sequelize</dd></div>
-          <div><dt>三维开发</dt><dd>Three.js · Unity · Unreal Engine</dd></div>
         </dl>
       </div>
       <section class="stack" aria-labelledby="stack-title">
